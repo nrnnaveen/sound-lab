@@ -1,8 +1,8 @@
-streamlit
-numpy
-matplotlib
-scipy
-librosa
-audioread
-pandas
-streamlit-webrtc
+streamlit==1.28.0
+numpy==1.26.5
+matplotlib==3.8.0
+scipy==1.11.1
+pandas==2.1.1
+librosa==0.10.3.post2
+soundfile==0.12.1
+streamlit-webrtc==0.57.0
