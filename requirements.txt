@@ -2,5 +2,7 @@ streamlit
 numpy
 matplotlib
 scipy
-soundfile
+librosa
+audioread
+pandas
 streamlit-webrtc
