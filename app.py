@@ -2,8 +2,9 @@ import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import fft
-from pydub import AudioSegment
 import io
+import soundfile as sf  # safe WAV reading
+from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, WebRtcMode
 
 # Musical note mapping
 NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -23,18 +24,15 @@ mode = st.radio("Select Input Mode", ["Live Microphone", "Upload Audio"])
 
 # ---------------- Upload Audio ----------------
 if mode == "Upload Audio":
-    uploaded_file = st.file_uploader("Upload WAV/MP3/M4A", type=["wav","mp3","m4a"])
+    uploaded_file = st.file_uploader("Upload PCM WAV only", type=["wav"])
     if uploaded_file is not None:
         # Playback immediately
         st.audio(uploaded_file)
 
-        # Load audio using pydub
-        audio = AudioSegment.from_file(io.BytesIO(uploaded_file.read()))
-        y = np.array(audio.get_array_of_samples())
-        if audio.channels == 2:
-            y = y.reshape((-1, 2))
-            y = y.mean(axis=1)  # convert to mono
-        sr = audio.frame_rate
+        # Read WAV safely
+        y, sr = sf.read(io.BytesIO(uploaded_file.read()))
+        if len(y.shape) > 1:
+            y = y.mean(axis=1)  # convert stereo to mono
 
         # FFT
         N = len(y)
@@ -60,8 +58,6 @@ if mode == "Upload Audio":
 # ---------------- Live Microphone ----------------
 elif mode == "Live Microphone":
     st.info("Streaming live microphone input. Make sounds to see frequency spectrum.")
-
-    from streamlit_webrtc import webrtc_streamer, AudioProcessorBase, WebRtcMode
 
     class FFTProcessor(AudioProcessorBase):
         def __init__(self):
